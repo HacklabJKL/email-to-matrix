@@ -19,7 +19,7 @@ arming status.
 ## Requirements
 
 ```sh
-sudo apt install jq uuidgen curl mpack
+sudo apt install jq uuid-runtime curl mpack
 ```
 
 ## Configuration

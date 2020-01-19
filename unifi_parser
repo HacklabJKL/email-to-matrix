@@ -5,7 +5,7 @@
 
 matrix () {
     payload=${3+--data-binary @-}
-    curl -v -X $1 $payload \
+    curl -X $1 $payload \
 	 -H "Content-Type: ${3-}" \
 	 -H "Authorization: Bearer $token" \
          "$server/_matrix/$2"
