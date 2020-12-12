@@ -1,0 +1,34 @@
+#!/bin/sh -eu
+#
+# Reads Asterisk voicemail messages and sends them to Matrix rooms
+# which have #tele-EXTENSION:hacklab.fi alias. Works on Telegram
+# bridged channels, too!
+
+# Read configuration
+. "`dirname $0`/matrix.conf"
+. "`dirname $0`/functions.sh"
+
+# Get Asterisk phone number. Do it without reading too much input (-u)
+cid=`sed -un '/^X-Asterisk-CallerID/{s/[^:]*: //p;q}'`
+
+# Unpacking message payload
+dir=`mktemp -d`
+cd $dir
+munpack -t
+
+myname=`sed -rn '/,$/{s/,$//p;q}' <part1`
+mynum=`sed -rn '/mailbox/{s/[^0-9]*([0-9]*).*/\1/p;q}' <part1`
+room="#tele-$mynum:hacklab.fi"
+export audioname="Viesti numerosta $cid"
+
+# Encode audio
+opusenc --artist "Numero $cid" --title "Viesti käyttäjälle $myname" -- *.wav viesti.opus
+
+# Composing Matrix message. Specs: https://matrix.org/docs/spec/client_server/latest#m-image
+room_id="`get_id "$room"`"
+matrix POST media/r0/upload image/jpeg <viesti.opus |
+    jq '{"body": env.audioname, "msgtype": "m.audio", "info": {"mimetype":"audio/ogg"}, "url": .content_uri }' |
+    matrix PUT "client/r0/rooms/$room_id/send/m.room.message/`uuidgen`" application/json
+
+# Removing the temp dir
+rm -r "$dir"
