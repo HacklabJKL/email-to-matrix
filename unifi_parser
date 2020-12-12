@@ -5,7 +5,7 @@
 . "`dirname $0`/functions.sh"
 
 # Is there anyone at Hacklab?
-if curl "$visitors/api/v1/visitors?format=json" | jq -e '.!=[]'; then
+if curl "$visitors/api/v1/hackbus?read=arming_state" | jq -e '.result.arming_state != "Armed"'; then
     echo Hacklab is occupied, not alerting.
     exit
 fi
