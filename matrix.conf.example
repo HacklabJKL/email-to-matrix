@@ -1,4 +1,4 @@
-# This is shell snippet. Remember not to include any extra spaces! 
+# This is shell snippet. Remember not to include any extra spaces!
 visitors=https://visitors.example.com
 server=https://matrix.example.com:8448
 room='!roomid:example.com'
