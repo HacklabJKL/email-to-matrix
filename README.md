@@ -41,11 +41,14 @@ fashion (i.e. without sending them to Google Mail).
 ## Requirements
 
 ```sh
-sudo apt install jq uuid-runtime curl mpack
+sudo apt install jq uuid-runtime curl mpack pandoc
 ```
 
 Version 1.6 or newer is required for `jq`. Otherwise `--rawfile`
 switch doesn't work.
+
+Pandoc is required in Wordpress contact form parser. It is not used
+elsewhere.
 
 ## Configuration
 
@@ -118,6 +121,39 @@ receive the voice mail for given extension. For example in our
 hackerspace our internal extension is 6906 so the alias should be
 `#tele-6906:hacklab.fi`. The home server can be any server and can be
 configured in `matrix.conf`.
+
+NB! The script expects default mail template. If you change the
+template, remember to modify the
+[asterisk_voicemail_parser](asterisk_voicemail_parser) accordingly.
+
+### Wordpress Contact Form
+
+The script [memberbot_parser](memberbot_parser) is very specific to
+our hackerspace membership form. You most likely need to edit it to
+match your needs. Also, you might need [WP Mail
+SMTP](https://wordpress.org/plugins/wp-mail-smtp/) to get the email
+out of your Wordpress server.
+
+We have the following message body:
+
+```
+name [your-name]
+born [your-year]
+email [your-email]
+city [your-city]
+tel [your-phone]
+nick [your-irc]
+fee [jasenyys]
+member [member]
+lang en
+msg
+[your-message]
+```
+
+The important part is to have multi-line message `[your-message]` as
+last row and have `msg` on a line of its own. Otherwise the parser
+fails. But again, this form parser probably needs a rewrite if you use
+it in a different setup.
 
 ## Security considerations
 
