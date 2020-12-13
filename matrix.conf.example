@@ -3,4 +3,5 @@ visitors=https://visitors.example.com
 server=https://matrix.example.com:8448
 room_alert='#room:example.com'
 room_member='#member:example.com'
+alias_homeserver='hacklab.fi'
 token=YOUR_ACCESS_TOKEN_HERE

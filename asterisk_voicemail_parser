@@ -18,7 +18,7 @@ munpack -t
 
 myname=`sed -rn '/,$/{s/,$//p;q}' <part1`
 mynum=`sed -rn '/mailbox/{s/[^0-9]*([0-9]*).*/\1/p;q}' <part1`
-room="#tele-$mynum:hacklab.fi"
+room="#tele-$mynum:$alias_homeserver"
 export audioname="Viesti numerosta $cid"
 
 # Encode audio
