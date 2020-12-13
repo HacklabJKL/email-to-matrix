@@ -1,8 +1,9 @@
 # Email-to-Matrix tools
 
-Even though E-mail is a very legacy transport, it is well supported in
-many application servers. There barely exists any application without
-a support for sending notifications via e-mail.
+Even though [electronic mail](https://en.wikipedia.org/wiki/Email) is
+a very legacy transport, it is well supported in many application
+servers. There barely exists any application without a support for
+sending notifications via email.
 
 Making Matrix pipes from all kinds of message passing facilities there
 exists today would be so pointless work because the payload needs to
@@ -10,7 +11,7 @@ be decoded differently, anyway.
 
 This repository has support for the following sources:
 
-* [Unifi-video](https://video.ui.com/) by Ubiquiti. Sends motion alerts with pictures to a Matrix room.
+* [UniFi Video](https://video.ui.com/) by Ubiquiti. Sends motion alerts with pictures to a Matrix room.
 * [Asterisk voicemail](https://wiki.asterisk.org/wiki/display/AST/Voicemail). Sends voice mail message audio clips in Ogg Opus format to a Matrix room.
 * [Wordpress Contact Form 7](https://en.wordpress.org/plugins/contact-form-7/) by Takayuki Miyoshi. Sends contact form data to a Matrix room as a table.
 
@@ -25,7 +26,7 @@ are.
 
 ## Idea
 
-On our hackerspace we have some Unifi surveillance cameras which send
+On our hackerspace we have some UniFi surveillance cameras which send
 email on motion. They send alerts by email which is pretty messy. This
 script listens to incoming emails and tralates them to Matrix picture
 messages.
