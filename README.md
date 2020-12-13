@@ -2,7 +2,7 @@
 
 Even though E-mail is a very legacy transport, it is well supported in
 many application servers. There barely exists any application without
-support for sending notifications via e-mail.9
+a support for sending notifications via e-mail.
 
 Making Matrix pipes from all kinds of message passing facilities there
 exists today would be so pointless work because the payload needs to
@@ -10,8 +10,8 @@ be decoded differently, anyway.
 
 This repository has support for the following sources:
 
-* [Unifi-video](https://video.ui.com/) by Ubiquiti. Sends motion alerts with pictures to Matrix room.
-* [Asterisk voicemail](https://wiki.asterisk.org/wiki/display/AST/Voicemail). Sends voice mail message audio clips in Ogg Opus format to Matrix room.
+* [Unifi-video](https://video.ui.com/) by Ubiquiti. Sends motion alerts with pictures to a Matrix room.
+* [Asterisk voicemail](https://wiki.asterisk.org/wiki/display/AST/Voicemail). Sends voice mail message audio clips in Ogg Opus format to a Matrix room.
 * [Wordpress Contact Form 7](https://en.wordpress.org/plugins/contact-form-7/) by Takayuki Miyoshi. Sends contact form data to a Matrix room as a table.
 
 The principle is the same: Your email server's pipe transport runs the
