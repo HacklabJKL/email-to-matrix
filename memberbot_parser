@@ -1,0 +1,27 @@
+#!/bin/sh -eu
+#
+# Reads memberbot initiated messages and produce Matrix messages
+# containg the new member data
+
+# Read configuration
+. "`dirname $0`/matrix.conf"
+. "`dirname $0`/functions.sh"
+
+filter="`readlink -f member-pandoc.jq`"
+
+# Unpacking message payload
+dir=`mktemp -d`
+cd $dir
+
+# Produce HTML and plain messages from input
+jq -sRf "$filter" >doc.json
+pandoc -i doc.json -o doc.html
+pandoc -i doc.json -o doc.txt
+
+# Composing Matrix message. Specs: https://matrix.org/docs/spec/client_server/latest#m-text
+room_id="`get_id "$room_member"`"
+jq -n --rawfile txt doc.txt --rawfile html doc.html '{"format": "org.matrix.custom.html", "body": $txt, "formatted_body": $html, "msgtype": "m.text" }' |
+    matrix PUT "client/r0/rooms/$room_id/send/m.room.message/`uuidgen`" application/json
+
+# Removing the temp dir
+rm -r "$dir"
