@@ -24,7 +24,7 @@ export audioname="Viesti numerosta $cid"
 # Encode audio
 opusenc --artist "Numero $cid" --title "Viesti käyttäjälle $myname" -- *.wav viesti.opus
 
-# Composing Matrix message. Specs: https://matrix.org/docs/spec/client_server/latest#m-image
+# Composing Matrix message. Specs: https://matrix.org/docs/spec/client_server/latest#m-audio
 room_id="`get_id "$room"`"
 matrix POST media/r0/upload image/jpeg <viesti.opus |
     jq '{"body": env.audioname, "msgtype": "m.audio", "info": {"mimetype":"audio/ogg"}, "url": .content_uri }' |
