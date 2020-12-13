@@ -3,13 +3,13 @@
 # Reads memberbot initiated messages and produce Matrix messages
 # containg the new member data
 
-# Read configuration
-. "`dirname $0`/matrix.conf"
-. "`dirname $0`/functions.sh"
-
+# Read configuration and collect filenames from script directory
+cd "`dirname $0`"
+. ./matrix.conf
+. ./functions.sh
 filter="`readlink -f member-pandoc.jq`"
 
-# Unpacking message payload
+# Move to a new directory
 dir=`mktemp -d`
 cd $dir
 
