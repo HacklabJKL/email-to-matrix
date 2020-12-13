@@ -19,7 +19,7 @@ munpack -t
 export camera_name="`sed -rn 's/^Motion Detected on camera (.*)/\1/p' <part1 | sed 's/ *$//g'`"
 
 # Composing Matrix message. Specs: https://matrix.org/docs/spec/client_server/latest#m-image
-room_id="`get_id "$room"`"
+room_id="`get_id "$room_alert"`"
 matrix POST media/r0/upload image/jpeg <part5 |
     jq '{"body": env.camera_name, "msgtype": "m.image", "url": .content_uri }' |
     matrix PUT "client/r0/rooms/$room_id/send/m.room.message/`uuidgen`" application/json
