@@ -10,9 +10,9 @@ be decoded differently, anyway.
 
 This repository has support for the following sources:
 
-* [Unifi-video](https://video.ui.com/) by Ubiquiti
-* [Asterisk voicemail](https://wiki.asterisk.org/wiki/display/AST/Voicemail)
-* [Wordpress Contact Form 7](https://en.wordpress.org/plugins/contact-form-7/) by Takayuki Miyoshi
+* [Unifi-video](https://video.ui.com/) by Ubiquiti. Sends motion alerts with pictures to Matrix room.
+* [Asterisk voicemail](https://wiki.asterisk.org/wiki/display/AST/Voicemail). Sends voice mail message audio clips in Ogg Opus format to Matrix room.
+* [Wordpress Contact Form 7](https://en.wordpress.org/plugins/contact-form-7/) by Takayuki Miyoshi. Sends contact form data to a Matrix room as a table.
 
 The principle is the same: Your email server's pipe transport runs the
 command and the corresponding script parses the message and delivers
@@ -41,7 +41,7 @@ fashion (i.e. without sending them to Google Mail).
 ## Requirements
 
 ```sh
-sudo apt install jq uuid-runtime curl mpack pandoc
+sudo apt install jq uuid-runtime curl mpack pandoc opus-tools
 ```
 
 Version 1.6 or newer is required for `jq`. Otherwise `--rawfile`
@@ -49,6 +49,8 @@ switch doesn't work.
 
 Pandoc is required in Wordpress contact form parser. It is not used
 elsewhere.
+
+Opus-tools is only needed by Asterisk voicemail script.
 
 ## Configuration
 
