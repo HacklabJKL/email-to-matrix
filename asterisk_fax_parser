@@ -1,4 +1,6 @@
 #!/bin/sh -eu
+#
+# Parse Asterisk's fax messages and deliver them to Matrix room
 
 # Read configuration
 . "`dirname $0`/matrix.conf"
