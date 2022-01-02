@@ -26,7 +26,7 @@ opusenc --artist "Numero $cid" --title "Viesti käyttäjälle $myname" -- *.wav 
 
 # Composing Matrix message. Specs: https://matrix.org/docs/spec/client_server/latest#m-audio
 room_id="`get_id "$room"`"
-matrix POST media/r0/upload image/jpeg <viesti.opus |
+matrix POST media/r0/upload audio/ogg <viesti.opus |
     jq '{"body": env.audioname, "msgtype": "m.audio", "info": {"mimetype":"audio/ogg"}, "url": .content_uri }' |
     matrix PUT "client/r0/rooms/$room_id/send/m.room.message/`uuidgen`" application/json
 

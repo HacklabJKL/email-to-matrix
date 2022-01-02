@@ -1,0 +1,24 @@
+#!/bin/sh -eu
+
+# Read configuration
+. "`dirname $0`/matrix.conf"
+. "`dirname $0`/functions.sh"
+
+# Unpacking message payload
+dir=`mktemp -d`
+cd $dir
+munpack -t
+
+cid=`sed -rn '/fax from/{s/[^0-9]*([0-9]*).*/\1/p;q}' <part1`
+mynum=`sed -rn '/Via/{s/.*(....)$/\1/p;q}' <part1`
+room="#tele-$mynum:hacklab.fi"
+export filename="Faksi numerosta $cid"
+
+# Composing Matrix message. Specs: https://matrix.org/docs/spec/client_server/latest#m-image
+room_id="`get_id "$room"`"
+cat *.pdf | matrix POST media/r0/upload application/pdf |
+    jq '{"body": env.filename, "msgtype": "m.file", "info": {"mimetype":"application/pdf"}, "url": .content_uri }' |
+    matrix PUT "client/r0/rooms/$room_id/send/m.room.message/`uuidgen`" application/json
+
+# Removing the temp dir
+rm -r "$dir"
