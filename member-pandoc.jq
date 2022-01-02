@@ -52,9 +52,7 @@ def pandocify:
   ],
   "pandoc-api-version": [
     1,
-    17,
-    5,
-    4
+    20
   ],
   "meta": {}
 }
