@@ -1,0 +1,31 @@
+#!/bin/sh -eu
+#
+# Send fax to given phone number. Run on the asterisk server.
+
+if test $# -ne 2; then
+    echo Usage: $0 PDF_FILE PHONE_NUMBER
+    exit 1
+fi
+
+perm () {
+    chown asterisk:asterisk "$1"
+    chmod g+r "$1"
+}
+
+tmp=`mktemp`
+tmptiff=`mktemp --suffix .tiff`
+
+# Convert image format
+gs -q -dNOPAUSE -dBATCH -sDEVICE=tiffg4 -sPAPERSIZE=a4 "-sOutputFile=$tmptiff" "$1"
+
+cat >$tmp <<EOF
+Channel: Local/$2@from-internal
+Application: SendFax
+Data: $tmptiff
+CallerID: "6900" <6900>
+EOF
+
+# Spool it
+perm "$tmp"
+perm "$tmptiff"
+mv "$tmp" /var/spool/asterisk/outgoing/

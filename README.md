@@ -13,6 +13,7 @@ This repository has support for the following sources:
 
 * [UniFi Video](https://video.ui.com/) by Ubiquiti. Sends motion alerts with pictures to a Matrix room.
 * [Asterisk voicemail](https://wiki.asterisk.org/wiki/display/AST/Voicemail). Sends voice mail message audio clips in Ogg Opus format to a Matrix room.
+* [Asterisk fax](http://www.asteriskdocs.org/en/3rd_Edition/asterisk-book-html-chunk/Fax_id263810.html). Receives faxes and delivers them to matrix rooms.
 * [Wordpress Contact Form 7](https://en.wordpress.org/plugins/contact-form-7/) by Takayuki Miyoshi. Sends contact form data to a Matrix room as a table.
 
 The principle is the same: Your email server's pipe transport runs the
@@ -129,6 +130,18 @@ NB! The script expects default mail template. If you change the
 template, remember to modify the
 [asterisk_voicemail_parser](asterisk_voicemail_parser) accordingly.
 
+### Asterisk fax
+
+Add the transport script's email address to the FreePBX user email
+address and enable Fax (also possible Fax detection) for your inbound
+route or multiple routes. The script parses the last 4 digits of the
+phone number and uses that as the target extension number.
+
+The same idea of #tele-EXTENSION as in Asterisk voice mail parser is
+used to route the message to the correct matrix room.
+
+Use PDF format in Asterisk (default). TIFF not supported.
+
 ### Wordpress Contact Form
 
 The script [memberbot_parser](memberbot_parser) is very specific to
@@ -165,3 +178,10 @@ not use it on encrypted channels. Also, the email addresses used
 should be kept private because the scripts are not validating where
 the email is coming from. However, if you run the MTA on your
 intranet, the issue is minor.
+
+## Extra content
+
+The repository also contains [fax](fax) script for Asterisk, used to
+send PDF files to a given fax number. That script needs to be run on
+the Asterisk server itself (not your mail server probably). It
+requires ghostscript for PDF to TIFF conversion.
