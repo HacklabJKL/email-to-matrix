@@ -35,6 +35,7 @@ myFilter orig = do
         jsonAdd linePath item doc
   foldM inserter templateDoc $ reverse kama
 
+-- |Given the template, create a factory which fills in the template
 lineFactory :: (ToJSON a, ToJSON b) => Value -> Maybe ((a, b) -> Maybe Value)
 lineFactory template = do
   pathToKey <- single $ jsonFind (jsonEq "KEY") template
@@ -51,11 +52,12 @@ tuple :: [a] -> Maybe (a, a)
 tuple [a,b] = Just (a,b)
 tuple _  = Nothing
 
+-- | Find diversion point between two paths (first difference in paths)
 basePaths :: (Path, Path) -> (Path, Path)
 basePaths (Path in1, Path in2) = (Path out1, Path out2)
   where (out1, out2) = unzip $ commons in1 in2
 
--- |Find common prefix of two lists, returning the first difference.
+-- |Find common prefix of two lists, returning until the first difference.
 commons :: Eq a => [a] -> [a] -> [(a, a)]
 commons (a:as) (b:bs) = (a,b) : if a == b
                                 then commons as bs
