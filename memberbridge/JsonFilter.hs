@@ -1,5 +1,13 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-module JsonFilter where
+module JsonFilter ( Path(..)
+                  , PathItem(..)
+                  , jsonFind
+                  , jsonEq
+                  , jsonGet
+                  , jsonAdd
+                  , jsonRemove
+                  , jsonReplace
+                  , withPath
+                  ) where
 
 import Data.Aeson
 import GHC.Exts (toList)
@@ -14,14 +22,17 @@ data PathItem = JKey Key | JIx Int deriving (Show, Eq)
 
 type Operation = Value -> Maybe Value
 
+root :: Path
+root = Path []
+
 -- |Find the path to that specified value
-jFind :: (Value -> Bool) -> Value -> [Path]
-jFind test a = append $ case a of
-  Object o -> concatMap (addPath JKey) $ toList $ jFind test <$> o
-  Array v  -> concatMap (addPath JIx) $ toList $ V.indexed $ jFind test <$> v
+jsonFind :: (Value -> Bool) -> Value -> [Path]
+jsonFind test a = append $ case a of
+  Object o -> concatMap (addPath JKey) $ toList $ jsonFind test <$> o
+  Array v  -> concatMap (addPath JIx) $ toList $ V.indexed $ jsonFind test <$> v
   _        -> []
   where append = if test a
-                 then (Path []:)
+                 then (root:)
                  else id
 
 -- |Helper function to convert a key to a path item and append it to the path of all items
