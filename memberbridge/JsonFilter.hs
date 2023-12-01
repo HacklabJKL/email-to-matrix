@@ -55,14 +55,16 @@ jsonGet _ val = Just val
 -- |Inserts item to given path.
 jsonAdd :: Path -> Value -> Value -> Maybe Value
 jsonAdd (Path fullPath) new val = case unsnoc fullPath of
-  Just (p, JIx i) -> jsonAlter (Path p) (vectorAdd i new) val
+  Just (p, JIx i)  -> jsonAlter (Path p) (vectorAdd i new) val
   Just (p, JKey k) -> jsonAlter (Path p) (mapAdd k new) val
+  _                -> Nothing
 
 -- |Removes item at given path.
 jsonRemove :: Path -> Value -> Maybe Value
 jsonRemove (Path fullPath) val = case unsnoc fullPath of
-  Just (p, JIx i) -> jsonAlter (Path p) (vectorRemove i) val
+  Just (p, JIx i)  -> jsonAlter (Path p) (vectorRemove i) val
   Just (p, JKey k) -> jsonAlter (Path p) (mapRemove k) val
+  Nothing          -> Nothing
 
 -- |Replaces item at given path with a new value.
 jsonReplace :: Path -> Value -> Value -> Maybe Value
