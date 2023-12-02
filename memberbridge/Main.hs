@@ -14,21 +14,23 @@ data ProcessException = ProcessException String deriving Show
 instance Exception ProcessException
 
 -- |Unwrap Maybe to an error if Nothing
-unwrap :: String -> Maybe a -> IO a
-unwrap e = maybe (throwIO $ ProcessException e) pure
+unmay :: Applicative f => String -> Maybe a -> f a
+unmay _ (Just a) = pure a
+unmay e _ = throw $ ProcessException e
 
 main = do
   emailFile <- getEnv "MEMBERBOT_EMAIL"
   rawEmail <- readFile emailFile
   bs <- BL.getContents
-  input <- unwrap "Invalid incoming JSON" $ decode bs
-  fields <- unwrap "E-mail parsing failed" $ emailToFields rawEmail
-  output <- unwrap "Template failed" $ myFilter fields input
+  input <- unmay "Invalid incoming JSON" $ decode bs
+  fields <- unmay "E-mail parsing failed" $ emailToFields rawEmail
+  output <- unmay "Template failed" $ myFilter fields input
   BL.putStr $ encode output
 
 myFilter :: (ToJSON a, ToJSON b) => [(a, b)] -> Value -> Maybe Value
 myFilter fields orig = do
-  paths <- tuple $ jsonFind (jsonEq "KEY") orig
+  paths <- unmay "Template must contain exactly two KEY fields on the same depth" $
+    tuple $ jsonFind (jsonEq "KEY") orig
   -- Figure out what's the repeating item
   let (linePath, linePath2) = basePaths paths
   -- Separate line template from the document
@@ -46,7 +48,8 @@ myFilter fields orig = do
 lineFactory :: (ToJSON a, ToJSON b) => Value -> Maybe ((a, b) -> Maybe Value)
 lineFactory template = do
   pathToKey <- single $ jsonFind (jsonEq "KEY") template
-  pathToValue <- single $ jsonFind (jsonEq "VALUE") template
+  pathToValue <- unmay "Template must contain VALUE" $
+    single $ jsonFind (jsonEq "VALUE") template
   pure $ \(k,v) -> jsonReplace pathToKey (toJSON k) template >>= jsonReplace pathToValue (toJSON v)
 
 -- |Convert list to single value, Nothing if it doesn't contain 1 element.
