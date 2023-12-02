@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
-module EmailParser where
+module EmailParser (emailToFields) where
 
 import Data.List (uncons)
 
 -- |Very simple email to fields parser. Assumes that input is UTF-8.
+emailToFields :: String -> Maybe [(String, String)]
 emailToFields raw = do
   let xs = lines raw
   -- Payload is separated by an empty line

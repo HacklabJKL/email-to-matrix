@@ -6,7 +6,8 @@ module JsonFilter ( Path(..)
                   , jsonAdd
                   , jsonRemove
                   , jsonReplace
-                  , withPath
+                  , single
+                  , tuple
                   ) where
 
 import Data.Aeson
@@ -22,23 +23,19 @@ data PathItem = JKey Key | JIx Int deriving (Show, Eq)
 
 type Operation = Value -> Maybe Value
 
-root :: Path
-root = Path []
-
 -- |Find the path to that specified value
 jsonFind :: (Value -> Bool) -> Value -> [Path]
-jsonFind test a = append $ case a of
-  Object o -> concatMap (addPath JKey) $ toList $ jsonFind test <$> o
-  Array v  -> concatMap (addPath JIx) $ toList $ V.indexed $ jsonFind test <$> v
-  _        -> []
-  where append = if test a
-                 then (root:)
-                 else id
+jsonFind test a = addSelf recurse
+  where addSelf = if test a then (Path []:) else id
+        recurse = case a of
+          Object o -> mangle JKey $ toList $ jsonFind test <$> o
+          Array v  -> mangle JIx $ toList $ V.indexed $ jsonFind test <$> v
+          _        -> []
+        mangle f = concatMap $ uncurry $ fmap . addPath f
 
 -- |Helper function to convert a key to a path item and append it to the path of all items
-addPath :: Functor f => (a -> PathItem) -> (a, f Path) -> f Path
-addPath f (a,bs) = append <$> bs
-  where append (Path p) = Path $ f a : p
+addPath :: (a -> PathItem) -> a -> Path -> Path
+addPath f a (Path p) = Path (f a:p)
 
 -- |Helper for doing exact match on any JSON encodable value.
 jsonEq :: ToJSON a => a -> Value -> Bool
@@ -110,5 +107,12 @@ vectorRemove i (Array v) = if V.length v <= i then Nothing else Just $ Array new
         new = start V.++ end
 vectorRemove _ _ = Nothing
 
--- |Helper for manipulating the path
-withPath f (Path a) = Path $ f a
+-- |Convert list to single value, Nothing if it doesn't contain 1 element.
+single :: [a] -> Maybe a
+single [a] = Just a
+single _ = Nothing
+
+-- |Convert list to tuple or Nothing if doesn't contain 2 elements.
+tuple :: [a] -> Maybe (a, a)
+tuple [a,b] = Just (a,b)
+tuple _  = Nothing
