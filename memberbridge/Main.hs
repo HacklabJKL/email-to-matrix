@@ -1,26 +1,33 @@
-module Main where
+#!/usr/bin/env runhaskell
 
 import Data.Aeson
 import qualified Data.ByteString.Lazy as BL
 import Control.Monad (foldM)
+import Control.Exception.Base
+import System.Environment (getEnv)
+
 import JsonFilter
+import EmailParser
 
-import Debug.Trace
+data ProcessException = ProcessException String deriving Show
 
-kama = [("etunimi", "Matti")
-       ,("sukunimi", "Meikäläinen")
-       ,("juu", "<Juupajuu>")
-       ]
+instance Exception ProcessException
+
+-- |Unwrap Maybe to an error if Nothing
+unwrap :: String -> Maybe a -> IO a
+unwrap e = maybe (throwIO $ ProcessException e) pure
 
 main = do
+  emailFile <- getEnv "MEMBERBOT_EMAIL"
+  rawEmail <- readFile emailFile
   bs <- BL.getContents
-  maybe (error "Error in JSON processing") BL.putStr $ do
-    input <- decode bs
-    output <- myFilter input
-    pure $ encode output
+  input <- unwrap "Invalid incoming JSON" $ decode bs
+  fields <- unwrap "E-mail parsing failed" $ emailToFields rawEmail
+  output <- unwrap "Template failed" $ myFilter fields input
+  BL.putStr $ encode output
 
-myFilter :: Value -> Maybe Value
-myFilter orig = do
+myFilter :: (ToJSON a, ToJSON b) => [(a, b)] -> Value -> Maybe Value
+myFilter fields orig = do
   paths <- tuple $ jsonFind (jsonEq "KEY") orig
   -- Figure out what's the repeating item
   let (linePath, linePath2) = basePaths paths
@@ -33,7 +40,7 @@ myFilter orig = do
   let inserter doc pair = do
         item <- newLine pair
         jsonAdd linePath item doc
-  foldM inserter templateDoc $ reverse kama
+  foldM inserter templateDoc $ reverse fields
 
 -- |Given the template, create a factory which fills in the template
 lineFactory :: (ToJSON a, ToJSON b) => Value -> Maybe ((a, b) -> Maybe Value)
