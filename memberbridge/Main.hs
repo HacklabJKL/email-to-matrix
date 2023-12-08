@@ -6,10 +6,9 @@ import qualified Data.ByteString.Lazy as BL
 import Control.Monad (foldM)
 import Control.Exception (ErrorCall, Exception, catch, throw, evaluate)
 import System.Environment (getEnv)
-import System.IO (Handle, hGetContents)
+import System.IO (Handle, hGetContents, hSetEncoding, utf8)
 import System.Posix.IO (fdToHandle)
 import System.Posix.Types (Fd(Fd))
-
 import JsonFilter
 import EmailParser
 
@@ -34,7 +33,9 @@ openFdFromEnv :: String -> IO Handle
 openFdFromEnv name = do
   emailEnv <- getEnv name
   fd <- unerror ("Environment " ++ name ++ " is not a number") $ read emailEnv
-  fdToHandle $ Fd fd
+  h <- fdToHandle $ Fd fd
+  hSetEncoding h utf8
+  pure h
 
 main :: IO ()
 main = do
