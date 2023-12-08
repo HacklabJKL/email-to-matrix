@@ -1,10 +1,14 @@
 #!/usr/bin/env runhaskell
+module Main where
 
 import Data.Aeson
 import qualified Data.ByteString.Lazy as BL
 import Control.Monad (foldM)
-import Control.Exception.Base
+import Control.Exception (ErrorCall, Exception, catch, throw, evaluate)
 import System.Environment (getEnv)
+import System.IO (Handle, hGetContents)
+import System.Posix.IO (fdToHandle)
+import System.Posix.Types (Fd(Fd))
 
 import JsonFilter
 import EmailParser
@@ -19,10 +23,24 @@ unmay :: Applicative f => String -> Maybe a -> f a
 unmay _ (Just a) = pure a
 unmay e _ = throw $ ProcessException e
 
+-- |Throw an exception if given pure value contains error.
+unerror :: String -> a -> IO a
+unerror msg a = catch (evaluate a) failer
+  where failer :: ErrorCall -> a
+        failer _ = throw $ ProcessException msg
+
+-- |Helper for opening file descriptor contents
+openFdFromEnv :: String -> IO Handle
+openFdFromEnv name = do
+  emailEnv <- getEnv name
+  fd <- unerror ("Environment " ++ name ++ " is not a number") $ read emailEnv
+  fdToHandle $ Fd fd
+
+main :: IO ()
 main = do
-  -- Read raw email message from a file
-  emailFile <- getEnv "MEMBERBOT_EMAIL"
-  rawEmail <- readFile emailFile
+  -- Get email payload from specified file descriptor
+  emailH <- openFdFromEnv "EMAIL_FD"
+  rawEmail <- hGetContents emailH
   -- Read AST from stdin
   bs <- BL.getContents
   -- Manipulate AST

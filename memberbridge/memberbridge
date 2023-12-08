@@ -1,0 +1,19 @@
+#!/bin/sh -eu
+
+# Try our best to find where the files are
+cd "$(dirname "$0")"
+
+json="$(mktemp --suffix=.json)"
+html="$(mktemp --suffix=.html)"
+txt="$(mktemp --suffix=.txt)"
+
+# Deliver email message via fd 3
+exec 3<&0
+pandoc -i new_member.md -t json | EMAIL_FD=3 runhaskell Main.hs >"$json"
+pandoc -i "$json" -o "$html"
+pandoc -i "$json" -o "$txt"
+
+# TODO copy rest of the stuff from ../memberbot_parser
+jq -n --rawfile txt "$txt" --rawfile html "$html" '{"format": "org.matrix.custom.html", "body": $txt, "formatted_body": $html, "msgtype": "m.text" }'
+
+rm "$json" "$html" "$txt"

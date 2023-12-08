@@ -3,7 +3,7 @@ lang: fi-FI
 papersize: a4
 ...
 
-# Uusi jäsen
+Uusi jäsen:
 
 ------ -----
 KEY    VALUE
