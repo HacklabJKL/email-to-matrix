@@ -1,27 +1,25 @@
 #!/bin/sh -eu
-#
-# Reads memberbot initiated messages and produce Matrix messages
-# containg the new member data
+
+# Try our best to find where the files are
+cd "$(dirname "$0")"
 
 # Read configuration and collect filenames from script directory
-cd "`dirname $0`"
 . ./matrix.conf
 . ./functions.sh
-filter="`readlink -f member-pandoc.jq`"
 
-# Move to a new directory
-dir=`mktemp -d`
-cd $dir
+json="$(mktemp --suffix=.json)"
+html="$(mktemp --suffix=.html)"
+txt="$(mktemp --suffix=.txt)"
 
-# Produce HTML and plain messages from input
-jq -sRf "$filter" >doc.json
-pandoc -i doc.json -o doc.html
-pandoc -i doc.json -o doc.txt
+# Deliver email message via fd 3
+exec 3<&0
+pandoc -i memberbridge/new_member.md -t json | EMAIL_FD=3 ./memberbridge/Main >"$json"
+pandoc -i "$json" -o "$html"
+pandoc -i "$json" -o "$txt"
 
 # Composing Matrix message. Specs: https://matrix.org/docs/spec/client_server/latest#m-text
 room_id="`get_id "$room_member"`"
-jq -n --rawfile txt doc.txt --rawfile html doc.html '{"format": "org.matrix.custom.html", "body": $txt, "formatted_body": $html, "msgtype": "m.text" }' |
+jq -n --rawfile txt "$txt" --rawfile html "$html" '{"format": "org.matrix.custom.html", "body": $txt, "formatted_body": $html, "msgtype": "m.text" }' |
     matrix PUT "client/r0/rooms/$room_id/send/m.room.message/`uuidgen`" application/json
 
-# Removing the temp dir
-rm -r "$dir"
+rm "$json" "$html" "$txt"
